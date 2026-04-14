@@ -1,4 +1,5 @@
 const express = require('express')
+const morgan = require('morgan')
 const app = express()
 
 let phonebook = [
@@ -26,8 +27,15 @@ let phonebook = [
 
 const date = Date()
 
-app.use(express.json()) // <--- ESSA LINHA É A CHAVE!
+app.use(express.json())
 
+morgan.token('body', (request, response) => {
+  return request.method === 'POST' 
+    ? JSON.stringify(request.body) 
+    : ''
+})
+
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 // GET
 
@@ -68,7 +76,6 @@ app.delete('/api/persons/:id', (request, response) => {
 
 app.post('/api/persons', (request, response) => {
     const body = request.body
-
 
     if (!body.name || !body.number) {
         return response.status(400).json({
